@@ -30,6 +30,7 @@ version_script: ?LazyPath = null,
 out_filename: []const u8,
 out_lib_filename: []const u8,
 linkage: ?std.builtin.LinkMode = null,
+linker_module_definition_file: ?LazyPath = null,
 version: ?std.SemanticVersion,
 kind: Kind,
 major_only_filename: ?[]const u8,
@@ -578,6 +579,12 @@ pub const setLinkerScriptPath = setLinkerScript;
 pub fn setLinkerScript(compile: *Compile, source: LazyPath) void {
     const b = compile.step.owner;
     compile.linker_script = source.dupe(b);
+    source.addStepDependencies(&compile.step);
+}
+
+pub fn setLinkerModuleDefinitionFile(compile: *Compile, source: LazyPath) void {
+    const b = compile.step.owner;
+    compile.linker_module_definition_file = source.dupe(b);
     source.addStepDependencies(&compile.step);
 }
 
@@ -1582,6 +1589,12 @@ fn getZigArgs(compile: *Compile, fuzz: bool) ![][]const u8 {
         try zig_args.append("--version-script");
         try zig_args.append(version_script.getPath2(b, step));
     }
+
+    if (compile.linker_module_definition_file) |linker_module_definition_file| {
+        try zig_args.append("--link-def-file");
+        try zig_args.append(linker_module_definition_file.getPath2(b, step));
+    }
+
     if (compile.linker_allow_undefined_version) |x| {
         try zig_args.append(if (x) "--undefined-version" else "--no-undefined-version");
     }

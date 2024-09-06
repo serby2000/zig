@@ -1161,6 +1161,8 @@ fn buildOutputType(
                         stack_size = parseStackSize(args_iter.nextOrFatal());
                     } else if (mem.eql(u8, arg, "--image-base")) {
                         image_base = parseImageBase(args_iter.nextOrFatal());
+                    } else if (mem.eql(u8, arg, "--link-def-file")) {
+                        linker_module_definition_file = args_iter.nextOrFatal();
                     } else if (mem.eql(u8, arg, "--name")) {
                         provided_name = args_iter.nextOrFatal();
                         if (!mem.eql(u8, provided_name.?, fs.path.basename(provided_name.?)))
